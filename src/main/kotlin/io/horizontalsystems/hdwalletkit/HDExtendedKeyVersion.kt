@@ -20,6 +20,19 @@ enum class HDExtendedKeyVersion(
     // bip84
     zprv(0x04b2430c, "zprv"),
     zpub(0x04b24746, "zpub"),
+    
+    // bip44
+    tprv(0x04358394, "tprv"),
+    tpub(0x043587cf, "tpub"),
+
+    //bip49
+    uprv(0x044a4e28, "uprv"),
+    upub(0x044a5262, "upub"),
+
+    //bip84
+    vprv(0x045f18bc, "vprv"),
+    vpub(0x045f1cf6, "vpub"),
+
 
     // litecoin bip44
     Ltpv(0x019d9cfe, "Ltpv"),
@@ -35,7 +48,8 @@ enum class HDExtendedKeyVersion(
                 listOf(ExtendedKeyCoinType.Bitcoin, ExtendedKeyCoinType.Litecoin)
             }
 
-            yprv, ypub -> {
+            yprv, ypub, tprv, tpub, vprv, 
+            vpub, uprv, upub -> {
                 listOf(ExtendedKeyCoinType.Bitcoin)
             }
 
@@ -50,15 +64,16 @@ enum class HDExtendedKeyVersion(
                 listOf(Purpose.BIP44, Purpose.BIP86)
             }
 
-            Ltpv, Ltub -> {
+            Ltpv, Ltub, tprv, tpub -> {
                 listOf(Purpose.BIP44)
             }
 
-            yprv, ypub, Mtpv, Mtub -> {
+            yprv, ypub, Mtpv, Mtub, 
+            uprv, upub -> {
                 listOf(Purpose.BIP49)
             }
 
-            zprv, zpub -> {
+            zprv, zpub, vprv, vpub -> {
                 listOf(Purpose.BIP84)
             }
         }
@@ -68,21 +83,37 @@ enum class HDExtendedKeyVersion(
             xprv -> xpub
             yprv -> ypub
             zprv -> zpub
+            tprv -> tpub
+            uprv -> upub
+            vprv -> vpub
             Ltpv -> Ltub
             Mtpv -> Mtub
-            xpub, ypub, zpub, Ltub, Mtub -> this
+            tprv -> tpub
+            uprv -> upub
+            vprv -> vpub
+            xpub, ypub, zpub, Ltub,
+            Mtub, tpub, upub, vpub -> this
         }
 
     val privKey: HDExtendedKeyVersion
         get() = when (this) {
-            xprv, yprv, zprv, Ltpv, Mtpv -> this
-            xpub, ypub, zpub, Ltub, Mtub -> throw IllegalStateException("No privateKey of $base58Prefix")
+            xprv, yprv, zprv, Ltpv, Mtpv, tprv, uprv, vprv -> this
+            xpub, ypub, zpub, Ltub, Mtub, tpub, upub, vpub -> throw IllegalStateException("No privateKey of $base58Prefix")
         }
 
     val isPublic: Boolean
         get() = when (this) {
-            xprv, yprv, zprv, Ltpv, Mtpv -> false
-            xpub, ypub, zpub, Ltub, Mtub -> true
+            xprv, yprv, zprv, Ltpv, Mtpv, tprv, uprv, vprv -> false
+            xpub, ypub, zpub, Ltub, Mtub, tpub, upub, vpub -> true
+        }
+    
+    val isTestNet: Boolean
+        get() = when (this) {
+            xprv, yprv, zprv, Ltpv, 
+            Mtpv, xpub, ypub, zpub, 
+            Ltub, Mtub -> false
+            tprv, tpub, uprv, upub, 
+            vprv, vpub -> true
         }
 
     companion object {

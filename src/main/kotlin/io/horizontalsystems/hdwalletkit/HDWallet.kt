@@ -1,5 +1,7 @@
 package io.horizontalsystems.hdwalletkit
 
+import io.horizontalsystems.hdwalletkit.HDExtendedKey.Companion.getVersion
+
 class HDWallet(
     private val hdKeychain: HDKeychain,
     private val coinType: Int,
@@ -89,6 +91,10 @@ class HDWallet(
 
     fun privateKey(path: String): HDKey {
         return hdKeychain.getKeyByPath(path)
+    }
+
+    fun masterPublicKey(mainNet: Boolean = true, passphraseWallet: Boolean): String {
+        return hdKeychain.getKeyByPath(if(passphraseWallet) "m" else "m/${purpose}'/$coinType'/0'").serializePublic(getVersion(purpose, !mainNet).value)
     }
 
 }

@@ -19,6 +19,15 @@ class HDExtendedKey(
         }
     )
 
+    constructor(seed: ByteArray, derivationPath: String, purpose: Purpose) : this(
+        HDKeychain(HDKeyDerivation.createRootKey(seed)).getKeyByPath(derivationPath),
+        when (purpose) {
+            Purpose.BIP44 -> HDExtendedKeyVersion.xprv
+            Purpose.BIP49 -> HDExtendedKeyVersion.yprv
+            Purpose.BIP84 -> HDExtendedKeyVersion.zprv
+        }
+    )
+
     val derivedType: DerivedType
         get() = DerivedType.initFrom(key.depth)
 
@@ -39,6 +48,18 @@ class HDExtendedKey(
 
     companion object {
         private const val length = 82
+
+        fun getVersion(purpose: Int, testNet: Boolean) : HDExtendedKeyVersion {
+            return when {
+                purpose == Purpose.BIP44.value && !testNet -> HDExtendedKeyVersion.xpub
+                purpose == Purpose.BIP49.value && !testNet -> HDExtendedKeyVersion.ypub
+                purpose == Purpose.BIP84.value && !testNet -> HDExtendedKeyVersion.zpub
+                purpose == Purpose.BIP44.value && testNet -> HDExtendedKeyVersion.tpub
+                purpose == Purpose.BIP49.value && testNet -> HDExtendedKeyVersion.upub
+                purpose == Purpose.BIP84.value && testNet -> HDExtendedKeyVersion.vpub
+                else -> HDExtendedKeyVersion.xpub
+            }
+        }
 
         private fun key(serialized: String): HDKey {
             val version = version(serialized)
