@@ -33,7 +33,6 @@ enum class HDExtendedKeyVersion(
     vprv(0x045f18bc, "vprv"),
     vpub(0x045f1cf6, "vpub"),
 
-
     // litecoin bip44
     Ltpv(0x019d9cfe, "Ltpv"),
     Ltub(0x019da462, "Ltub"),
@@ -88,9 +87,6 @@ enum class HDExtendedKeyVersion(
             vprv -> vpub
             Ltpv -> Ltub
             Mtpv -> Mtub
-            tprv -> tpub
-            uprv -> upub
-            vprv -> vpub
             xpub, ypub, zpub, Ltub,
             Mtub, tpub, upub, vpub -> this
         }
@@ -120,25 +116,42 @@ enum class HDExtendedKeyVersion(
         fun initFrom(
             purpose: Purpose,
             coinType: ExtendedKeyCoinType,
-            isPrivate: Boolean
+            isPrivate: Boolean,
+            isTestNet: Boolean = false
         ): HDExtendedKeyVersion {
             return when (purpose) {
                 Purpose.BIP44 -> {
                     when (coinType) {
-                        ExtendedKeyCoinType.Bitcoin -> if (isPrivate) xprv else xpub
+                        ExtendedKeyCoinType.Bitcoin -> {
+                            if(isTestNet) {
+                                if (isPrivate) tprv else tpub
+                            } else {
+                                if (isPrivate) xprv else xpub
+                            }
+                        }
                         ExtendedKeyCoinType.Litecoin -> if (isPrivate) Ltpv else Ltub
                     }
                 }
 
                 Purpose.BIP49 -> {
                     when (coinType) {
-                        ExtendedKeyCoinType.Bitcoin -> if (isPrivate) yprv else ypub
+                        ExtendedKeyCoinType.Bitcoin -> {
+                            if(isTestNet) {
+                                if (isPrivate) uprv else upub
+                            } else {
+                                if (isPrivate) yprv else ypub
+                            }
+                        }
                         ExtendedKeyCoinType.Litecoin -> if (isPrivate) Mtpv else Mtub
                     }
                 }
 
                 Purpose.BIP84 -> {
-                    if (isPrivate) zprv else zpub
+                    if(isTestNet) {
+                        if (isPrivate) vprv else vpub
+                    } else {
+                        if (isPrivate) zprv else zpub
+                    }
                 }
 
                 Purpose.BIP86 -> {
